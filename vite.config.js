@@ -3,6 +3,7 @@ import obfuscator from 'rollup-plugin-obfuscator';
 
 export default defineConfig({
     build: {
+        outDir: 'public',
         rollupOptions: {
             plugins: [
                 obfuscator({
