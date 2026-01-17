@@ -1,0 +1,1128 @@
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator by ngopikode.</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+          rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- html2pdf.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            /* Tema Ngopikode: Coffee & Warm Tones */
+            --primary-color: #6F4E37; /* Coffee Brown */
+            --primary-hover: #5D4037;
+            --secondary-color: #795548;
+            --bg-color: #EFEBE9; /* Very light warm grey */
+            --paper-width: 297mm;
+            --paper-height: 210mm;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif;
+            color: #3E2723; /* Dark Brown Text */
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        /* --- Paper Styles --- */
+        .invoice-paper {
+            background-color: white;
+            width: var(--paper-width);
+            min-height: var(--paper-height);
+            margin: 0 auto;
+            padding: 15mm;
+            box-shadow: 0 10px 30px rgba(62, 39, 35, 0.1); /* Brownish shadow */
+            position: relative;
+            box-sizing: border-box;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* --- Editable Logic (Updated with Edit Icon) --- */
+        .editable, .editable-label {
+            background: transparent;
+            border: 1px solid transparent; /* Transparent border default */
+            border-bottom: 1px dashed #D7CCC8; /* Dashed line for visual cue */
+            border-radius: 2px;
+            width: 100%;
+            color: inherit;
+            font-family: inherit;
+            transition: 0.2s;
+            cursor: text;
+        }
+
+        /* Input specific resets */
+        .editable-label {
+            padding: 0;
+            margin: 0;
+            font-weight: inherit;
+            font-size: inherit;
+            text-transform: inherit;
+            text-align: inherit;
+        }
+
+        .editable {
+            padding: 2px 4px;
+        }
+
+        .editable-textarea {
+            resize: none;
+            overflow: hidden;
+            min-height: 1.5em;
+        }
+
+        /* --- Hover State: Show Edit Icon --- */
+        .editable:hover, .editable-label:hover {
+            background-color: #FAFAFA;
+            border-bottom-color: var(--primary-color);
+            /* Pensil Icon SVG Data URI */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%236F4E37' opacity='0.5'%3E%3Cpath d='M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L386 255.3l22.6-22.6 1.7 1.7z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 4px center; /* Icon on the right */
+            background-size: 12px;
+        }
+
+        /* Text area edit icon alignment */
+        textarea.editable:hover {
+            background-position: top 4px right 4px;
+        }
+
+        /* Focus State: Remove icon, highlight border */
+        .editable:focus, .editable-label:focus {
+            outline: none;
+            border-bottom: 1px solid var(--primary-color);
+            background-color: #fff;
+            background-image: none; /* Hide icon when typing */
+        }
+
+        /* Specific styles for special inputs */
+        .invoice-table th input.editable-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        .title-input {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            letter-spacing: -1px;
+            text-align: left;
+        }
+
+        /* --- Section Labels --- */
+        .section-label-container {
+            margin-bottom: 5px;
+            border-bottom: 2px solid #D7CCC8;
+            padding-bottom: 2px;
+        }
+
+        .section-label-input {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+
+        .input-group-text-custom {
+            background: transparent;
+            border: none;
+            color: var(--secondary-color);
+            font-size: 0.85rem;
+            padding-right: 5px;
+            width: 20px;
+        }
+
+        /* --- Components --- */
+        .logo-placeholder {
+            width: 100%;
+            height: 100px;
+            background-color: #FAFAFA;
+            border: 2px dashed #D7CCC8;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #A1887F;
+            transition: 0.2s;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .logo-placeholder:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .logo-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* --- Table Styling --- */
+        .table-responsive-custom {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 4px;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            min-width: 600px;
+        }
+
+        .invoice-table th {
+            text-align: left;
+            padding: 8px 4px;
+            border-bottom: 2px solid #D7CCC8;
+            white-space: nowrap;
+        }
+
+        .invoice-table td {
+            padding: 6px 4px;
+            vertical-align: top;
+            background: #fff;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* Column Widths */
+        .col-item {
+            width: 20%;
+            min-width: 120px;
+        }
+
+        .col-desc {
+            width: 25%;
+            min-width: 150px;
+        }
+
+        .col-qty {
+            width: 8%;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .col-price {
+            width: 15%;
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .col-disc {
+            width: 10%;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .col-tax {
+            width: 10%;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .col-total {
+            width: 12%;
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .btn-add-item {
+            width: 100%;
+            padding: 12px;
+            border: 1px dashed var(--primary-color);
+            background: #FBE9E7; /* Light warm bg */
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .btn-add-item:hover {
+            background: #FFCCBC;
+        }
+
+        /* --- Floating Action Buttons --- */
+        .fab-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+            z-index: 1000;
+        }
+
+        .fab-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .fab-btn {
+            height: 50px;
+            padding: 0 20px;
+            border-radius: 25px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            gap: 8px;
+        }
+
+        .fab-btn:active {
+            transform: scale(0.95);
+        }
+
+        .fab-print {
+            background-color: var(--primary-color);
+        }
+
+        .fab-print:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .fab-dl {
+            background-color: #2E7D32;
+        }
+
+        /* Green for download */
+        .fab-dl:hover {
+            background-color: #1B5E20;
+        }
+
+        .fab-reset {
+            background-color: #D32F2F;
+            width: 50px;
+            padding: 0;
+        }
+
+        .fab-reset:hover {
+            background-color: #B71C1C;
+        }
+
+        /* --- Toggles Overlay --- */
+        .toggles-overlay {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 12px 18px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            font-size: 0.85rem;
+            z-index: 1000;
+            border: 1px solid #D7CCC8;
+            color: var(--primary-color);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* --- Footer Branding --- */
+        .brand-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #A1887F;
+            border-top: 1px dotted #D7CCC8;
+            width: 100%;
+        }
+
+        .brand-footer i {
+            color: var(--primary-color);
+        }
+
+        /* --- Totals Box --- */
+        .totals-box {
+            background-color: #FBE9E7; /* Very light warm bg */
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .text-primary-custom {
+            color: var(--primary-color) !important;
+        }
+
+        /* --- Responsive Logic --- */
+        @media (max-width: 992px) {
+            body {
+                padding: 10px;
+                padding-bottom: 90px;
+            }
+
+            .invoice-paper {
+                width: 100%;
+                height: auto;
+                min-height: 100vh;
+                padding: 20px;
+                border-radius: 8px;
+            }
+
+            .mobile-no-border {
+                border-right: none !important;
+                border-bottom: 1px solid #D7CCC8;
+                padding-right: 0 !important;
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+            }
+
+            .mobile-ps-0 {
+                padding-left: 0 !important;
+            }
+
+            .header-grid {
+                flex-direction: column;
+            }
+
+            /* Adjust FAB for mobile */
+            .fab-btn {
+                font-size: 0.8rem;
+                padding: 0 15px;
+                height: 45px;
+            }
+
+            .fab-reset {
+                width: 45px;
+                padding: 0;
+            }
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 0;
+            }
+
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .invoice-paper {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                height: 100vh;
+                padding: 10mm 15mm;
+                border: none;
+                max-width: none;
+            }
+
+            .header-grid {
+                flex-direction: row !important;
+            }
+
+            .mobile-no-border {
+                border-right: 1px solid #D7CCC8 !important;
+                border-bottom: none !important;
+                padding-right: 3rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            .mobile-ps-0 {
+                padding-left: 3rem !important;
+            }
+
+            .col-md-6 {
+                width: 50% !important;
+                flex: 0 0 auto !important;
+            }
+
+            /* Hide non-print elements AND Footer */
+            .no-print,
+            .fab-container,
+            .toggles-overlay,
+            .btn-add-item,
+            .brand-footer {
+                display: none !important;
+            }
+
+            /* Clean up editable fields for print */
+            .editable, .editable-label {
+                border: none !important;
+                padding: 0;
+                cursor: default;
+                background-image: none !important; /* Ensure no edit icon on print */
+            }
+
+            .logo-placeholder {
+                border: none;
+            }
+
+            .logo-placeholder:not(:has(img)) {
+                display: none;
+            }
+
+            .table-responsive-custom {
+                overflow: visible;
+            }
+
+            .invoice-table {
+                min-width: auto;
+            }
+
+            .title-input {
+                text-align: left !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Floating Actions -->
+<div class="fab-container no-print">
+    <div class="fab-group">
+        <button class="fab-btn fab-reset" onclick="clearData()" title="Reset Data">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+        <button class="fab-btn fab-print" onclick="window.print()" title="Cetak (Browser)">
+            <i class="fas fa-print"></i> Cetak
+        </button>
+        <button class="fab-btn fab-dl" onclick="handleDownloadPDF()" title="Simpan PDF">
+            <i class="fas fa-file-pdf"></i> Download PDF
+        </button>
+    </div>
+</div>
+
+<!-- Toggles -->
+<div class="toggles-overlay no-print">
+    <div class="d-flex gap-3 align-items-center">
+        <div class="form-check form-switch m-0">
+            <input class="form-check-input" type="checkbox" id="showDisc" checked="" onchange="toggleColumns()">
+            <label class="form-check-label" for="showDisc">Diskon</label>
+        </div>
+        <div class="form-check form-switch m-0">
+            <input class="form-check-input" type="checkbox" id="showTax" checked="" onchange="toggleColumns()">
+            <label class="form-check-label" for="showTax">Pajak</label>
+        </div>
+    </div>
+</div>
+
+<!-- Main Paper -->
+<div class="invoice-paper" id="invoiceArea">
+
+    <div>
+        <!-- Header Grid -->
+        <div class="row header-grid gx-0">
+            <!-- Left Column -->
+            <div class="col-md-6 mobile-no-border pe-md-5">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="logo-placeholder" onclick="document.getElementById('logoInput').click()">
+                            <input type="file" id="logoInput" hidden="" accept="image/*"
+                                   onchange="handleLogoUpload(this)">
+                            <img id="logoPreview" src="" style="display: none;">
+                            <span id="logoText" class="text-center small"><i
+                                    class="fas fa-mug-hot mb-1 d-block fa-lg"></i>Logo</span>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div class="section-label-container">
+                            <input type="text" class="editable-label section-label-input" id="labelFrom"
+                                   value="Dari (Perusahaan)" oninput="saveData()">
+                        </div>
+                        <input type="text" class="editable fw-bold fs-6 mb-1 text-primary-custom"
+                               placeholder="Nama Perusahaan Anda" id="companyName" oninput="saveData()">
+                        <textarea class="editable editable-textarea mb-1" rows="2" placeholder="Alamat Perusahaan"
+                                  id="companyAddress" oninput="saveData()"></textarea>
+                        <div class="d-flex align-items-center d-print-none" id="companyPhoneWrapper">
+                            <span class="input-group-text-custom"><i class="fas fa-phone"></i></span>
+                            <input type="text" class="editable" placeholder="Telepon" id="companyPhone"
+                                   oninput="saveData(); updatePrintVisibility()">
+                        </div>
+                        <div class="d-flex align-items-center d-print-none" id="companyEmailWrapper">
+                            <span class="input-group-text-custom"><i class="fas fa-envelope"></i></span>
+                            <input type="text" class="editable" placeholder="Email" id="companyEmail"
+                                   oninput="saveData(); updatePrintVisibility()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="section-label-container">
+                        <input type="text" class="editable-label section-label-input" id="labelTo"
+                               value="Tagihan Untuk (Klien)" oninput="saveData()">
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <input type="text" class="editable fw-bold fs-6 mb-1 text-primary-custom"
+                                   placeholder="Nama Klien" id="clientName" oninput="saveData()">
+                            <textarea class="editable editable-textarea mb-1" rows="2" placeholder="Alamat Klien"
+                                      id="clientAddress" oninput="saveData()"></textarea>
+                            <div class="d-flex align-items-center d-print-none" id="clientContactWrapper">
+                                <span class="input-group-text-custom"><i class="fas fa-user"></i></span>
+                                <input type="text" class="editable" placeholder="Nama Kontak (Opsional)"
+                                       id="clientContact" oninput="saveData(); updatePrintVisibility()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-md-6 mobile-ps-0 ps-md-5">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="w-100">
+                        <input type="text" class="editable-label title-input" id="labelInvoiceTitle" value="INVOICE"
+                               oninput="saveData()">
+                        <input type="text" class="editable-label text-muted small" id="labelInvoiceSubtitle"
+                               value="Original Document" oninput="saveData()">
+                    </div>
+                    <div class="text-end" style="min-width: 150px;">
+                        <div class="mb-1">
+                            <input type="text" class="editable-label text-end text-secondary small fw-bold"
+                                   id="labelInvoiceNo" value="Nomor Referensi" oninput="saveData()">
+                            <input type="text" class="editable text-end fw-bold fs-5 text-primary-custom"
+                                   value="INV/2026/001" id="invoiceNo" oninput="saveData()">
+                        </div>
+                        <div class="mb-1">
+                            <input type="text" class="editable-label text-end text-secondary small fw-bold"
+                                   id="labelDate" value="Tanggal Terbit" oninput="saveData()">
+                            <input type="date" class="editable text-end" id="invoiceDate" oninput="saveData()">
+                        </div>
+                        <div>
+                            <input type="text" class="editable-label text-end text-secondary small fw-bold"
+                                   id="labelDue" value="Jatuh Tempo" oninput="saveData()">
+                            <input type="date" class="editable text-end text-danger" id="dueDate" oninput="saveData()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Area -->
+                <div class="mt-4 pt-3 border-top" style="border-color: #D7CCC8 !important;">
+                    <div class="section-label-container">
+                        <input type="text" class="editable-label section-label-input" id="labelNotes"
+                               value="Catatan / Metode Pembayaran" oninput="saveData()">
+                    </div>
+                    <textarea class="editable editable-textarea p-2 rounded" style="background-color: #FBE9E7;" rows="3"
+                              placeholder="Silakan transfer ke Bank BCA 1234567890 a.n PT Ngopi Kode..." id="notes"
+                              oninput="saveData()" onblur="checkNotes()"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="mt-4">
+            <div class="table-responsive-custom">
+                <table class="invoice-table">
+                    <thead>
+                    <tr>
+                        <th class="col-item"><input type="text" class="editable-label" id="headerItem" value="Item"
+                                                    oninput="saveData()"></th>
+                        <th class="col-desc"><input type="text" class="editable-label" id="headerDesc" value="Deskripsi"
+                                                    oninput="saveData()"></th>
+                        <th class="col-qty"><input type="text" class="editable-label text-center" id="headerQty"
+                                                   value="Qty" oninput="saveData()"></th>
+                        <th class="col-price"><input type="text" class="editable-label text-end" id="headerPrice"
+                                                     value="Harga" oninput="saveData()"></th>
+                        <th class="col-disc column-disc"><input type="text" class="editable-label text-center"
+                                                                id="headerDisc" value="Disc %" oninput="saveData()">
+                        </th>
+                        <th class="col-tax column-tax"><input type="text" class="editable-label text-center"
+                                                              id="headerTax" value="Pajak %" oninput="saveData()"></th>
+                        <th class="col-total"><input type="text" class="editable-label text-end" id="headerTotal"
+                                                     value="Total" oninput="saveData()"></th>
+                        <th class="no-print" style="width: 30px;"></th>
+                    </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                    <tr>
+                        <td>
+                            <input type="text" class="editable fw-bold" placeholder="Item" value=""
+                                   oninput="updateItem(0, 'name', this.value)">
+                        </td>
+                        <td>
+                            <textarea class="editable editable-textarea text-muted small" placeholder="Deskripsi"
+                                      oninput="updateItem(0, 'desc', this.value)"></textarea>
+                        </td>
+                        <td>
+                            <input type="number" class="editable text-center" value="1" min="1"
+                                   oninput="updateItem(0, 'qty', parseFloat(this.value))">
+                        </td>
+                        <td>
+                            <input type="number" class="editable text-end" value="0"
+                                   oninput="updateItem(0, 'price', parseFloat(this.value))">
+                        </td>
+                        <td class="column-disc">
+                            <div class="input-group input-group-sm">
+                                <input type="number" class="form-control border-0 bg-transparent text-center p-0"
+                                       value="0" oninput="updateItem(0, 'disc', parseFloat(this.value))">
+                                <span class="small text-muted align-self-center">%</span>
+                            </div>
+                        </td>
+                        <td class="column-tax">
+                            <input type="number" class="form-control border-0 bg-transparent text-center p-0" value="0"
+                                   oninput="updateItem(0, 'tax', parseFloat(this.value))">
+                        </td>
+                        <td class="text-end fw-bold">
+                            Rp&nbsp;0
+                        </td>
+                        <!-- data-html2canvas-ignore ensures delete icon is not in PDF -->
+                        <td class="no-print text-center align-middle" data-html2canvas-ignore="true">
+                            <i class="fas fa-trash text-danger" style="cursor:pointer;" onclick="removeItem(0)"></i>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- data-html2canvas-ignore ensures this button is not in PDF -->
+            <button class="btn-add-item no-print" data-html2canvas-ignore="true" onclick="addItem()">
+                <i class="fas fa-plus me-2"></i> Tambah Item Baru
+            </button>
+        </div>
+
+        <!-- Footer / Totals -->
+        <div class="row mt-4">
+            <div class="col-md-7 order-2 order-md-1 mt-4 mt-md-0">
+                <div class="d-flex gap-2 gap-md-5 justify-content-between justify-content-md-start">
+                    <div class="text-center" style="width: 140px;">
+                        <div class="mb-4">
+                            <input type="text" class="editable-label text-center small text-muted" id="labelRecipient"
+                                   value="Penerima" oninput="saveData()">
+                        </div>
+                        <div class="border-bottom border-secondary mb-2"
+                             style="height: 40px; border-color: #A1887F !important;"></div>
+                        <span class="small text-muted">( Tanda Tangan )</span>
+                    </div>
+                    <div class="text-center" style="width: 140px;">
+                        <div class="mb-4">
+                            <input type="text" class="editable-label text-center small text-muted" id="labelSender"
+                                   value="Hormat Kami" oninput="saveData()">
+                        </div>
+                        <div style="height: 40px;"></div>
+                        <input type="text" class="editable text-center fw-bold small border-bottom"
+                               style="border-color: #A1887F !important;" value="Manager Keuangan" id="signerName"
+                               oninput="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5 order-1 order-md-2">
+                <div class="totals-box">
+                    <div class="d-flex justify-content-between mb-1">
+                        <div style="width: 50%;">
+                            <input type="text" class="editable-label text-secondary small" id="labelSubtotal"
+                                   value="Subtotal" oninput="saveData()">
+                        </div>
+                        <span class="fw-bold" id="subtotalDisplay">Rp 0</span>
+                    </div>
+
+                    <div id="rowTotalDisc" class="d-flex justify-content-between mb-1 text-danger small"
+                         style="display: flex;">
+                        <div style="width: 50%;">
+                            <input type="text" class="editable-label text-danger" id="labelTotalDisc"
+                                   value="Total Diskon" oninput="saveData()">
+                        </div>
+                        <span id="totalDiscDisplay">(Rp 0)</span>
+                    </div>
+
+                    <div id="rowTotalTax" class="d-flex justify-content-between mb-2 small" style="display: flex;">
+                        <div style="width: 50%;">
+                            <input type="text" class="editable-label" id="labelTotalTax" value="Total Pajak"
+                                   oninput="saveData()">
+                        </div>
+                        <span id="totalTaxDisplay">Rp 0</span>
+                    </div>
+
+                    <hr class="my-2" style="border-color: #D7CCC8;">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div style="width: 60%;">
+                            <input type="text" class="editable-label fs-5 fw-bold text-primary-custom"
+                                   id="labelGrandTotal" value="Total Tagihan" oninput="saveData()">
+                        </div>
+                        <span class="fs-5 fw-bold text-primary-custom" id="grandTotalDisplay">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branding Footer (Ignored in PDF generation via data-html2canvas-ignore) -->
+    <div class="brand-footer" data-html2canvas-ignore="true">
+        <i class="fas fa-mug-hot me-1"></i> Powered by <strong>ngopikode.</strong>
+    </div>
+
+</div>
+
+<!-- Scripts -->
+<script>
+    const defaultItem = {name: '', desc: '', qty: 1, price: 0, disc: 0, tax: 0};
+    let items = [{...defaultItem}];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().split('T')[0];
+        if (!document.getElementById('invoiceDate').value) document.getElementById('invoiceDate').value = today;
+
+        if (!document.getElementById('dueDate').value) {
+            const due = new Date();
+            due.setDate(due.getDate() + 30);
+            document.getElementById('dueDate').value = due.toISOString().split('T')[0];
+        }
+
+        loadData();
+        renderItems();
+        toggleColumns();
+        updatePrintVisibility(); // Initial check
+    });
+
+    function formatIDR(num) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(num);
+    }
+
+    function addItem() {
+        items.push({...defaultItem});
+        renderItems();
+        calculateAll();
+        saveData();
+    }
+
+    function removeItem(index) {
+        if (items.length > 1) {
+            items.splice(index, 1);
+            renderItems();
+            calculateAll();
+            saveData();
+        }
+    }
+
+    function updateItem(index, field, value) {
+        items[index][field] = value;
+        calculateAll();
+        saveData();
+    }
+
+    function renderItems() {
+        const tbody = document.getElementById('itemsBody');
+        tbody.innerHTML = '';
+
+        items.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            const sub = item.qty * item.price;
+            const discVal = sub * (item.disc / 100);
+            const taxBase = sub - discVal;
+            const taxVal = taxBase * (item.tax / 100);
+            const total = taxBase + taxVal;
+
+            tr.innerHTML = `
+                    <td>
+                        <input type="text" class="editable fw-bold" placeholder="Item"
+                            value="${item.name}" oninput="updateItem(${index}, 'name', this.value)">
+                    </td>
+                    <td>
+                        <textarea class="editable editable-textarea text-muted small" placeholder="Deskripsi"
+                            oninput="updateItem(${index}, 'desc', this.value)">${item.desc}</textarea>
+                    </td>
+                    <td>
+                        <input type="number" class="editable text-center" value="${item.qty}" min="1"
+                            oninput="updateItem(${index}, 'qty', parseFloat(this.value))">
+                    </td>
+                    <td>
+                        <input type="number" class="editable text-end" value="${item.price}"
+                            oninput="updateItem(${index}, 'price', parseFloat(this.value))">
+                    </td>
+                    <td class="column-disc">
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control border-0 bg-transparent text-center p-0"
+                                value="${item.disc}" oninput="updateItem(${index}, 'disc', parseFloat(this.value))">
+                            <span class="small text-muted align-self-center">%</span>
+                        </div>
+                    </td>
+                    <td class="column-tax">
+                        <input type="number" class="form-control border-0 bg-transparent text-center p-0"
+                                value="${item.tax}" oninput="updateItem(${index}, 'tax', parseFloat(this.value))">
+                    </td>
+                    <td class="text-end fw-bold">
+                        ${formatIDR(total)}
+                    </td>
+                    <!-- data-html2canvas-ignore ensures delete icon is not in PDF -->
+                    <td class="no-print text-center align-middle" data-html2canvas-ignore="true">
+                        <i class="fas fa-trash text-danger" style="cursor:pointer;" onclick="removeItem(${index})"></i>
+                    </td>
+                `;
+            tbody.appendChild(tr);
+        });
+        toggleColumns();
+    }
+
+    function toggleColumns() {
+        const showDisc = document.getElementById('showDisc').checked;
+        const showTax = document.getElementById('showTax').checked;
+
+        document.querySelectorAll('.column-disc').forEach(el => el.style.display = showDisc ? '' : 'none');
+        document.querySelectorAll('.column-tax').forEach(el => el.style.display = showTax ? '' : 'none');
+        document.getElementById('headerDisc').parentElement.style.display = showDisc ? '' : 'none';
+        document.getElementById('headerTax').parentElement.style.display = showTax ? '' : 'none';
+
+        document.getElementById('rowTotalDisc').style.display = showDisc ? 'flex' : 'none';
+        document.getElementById('rowTotalTax').style.display = showTax ? 'flex' : 'none';
+    }
+
+    function calculateAll() {
+        let subtotal = 0;
+        let totalDisc = 0;
+        let totalTax = 0;
+
+        items.forEach(item => {
+            const qty = item.qty || 0;
+            const price = item.price || 0;
+            const discPct = item.disc || 0;
+            const taxPct = item.tax || 0;
+
+            const base = qty * price;
+            const discAmt = base * (discPct / 100);
+            const afterDisc = base - discAmt;
+            const taxAmt = afterDisc * (taxPct / 100);
+
+            subtotal += base;
+            totalDisc += discAmt;
+            totalTax += taxAmt;
+        });
+
+        const grandTotal = subtotal - totalDisc + totalTax;
+
+        document.getElementById('subtotalDisplay').innerText = formatIDR(subtotal);
+        document.getElementById('totalDiscDisplay').innerText = `(${formatIDR(totalDisc)})`;
+        document.getElementById('totalTaxDisplay').innerText = formatIDR(totalTax);
+        document.getElementById('grandTotalDisplay').innerText = formatIDR(grandTotal);
+    }
+
+    function handleLogoUpload(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('logoPreview').src = e.target.result;
+                document.getElementById('logoPreview').style.display = 'block';
+                document.getElementById('logoText').style.display = 'none';
+                try {
+                    localStorage.setItem('kledo_logo', e.target.result);
+                } catch (e) {
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // --- PDF Generation Logic using html2pdf.js ---
+    function handleDownloadPDF() {
+        // Force update visibility before print just in case
+        updatePrintVisibility();
+
+        const btn = document.querySelector('.fab-dl');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+        const element = document.getElementById('invoiceArea');
+        const invNo = document.getElementById('invoiceNo').value.replace(/[^a-zA-Z0-9]/g, '_') || 'Invoice';
+
+        const opt = {
+            margin: 0,
+            filename: `${invNo}.pdf`,
+            image: {type: 'jpeg', quality: 0.98},
+            html2canvas: {scale: 2, useCORS: true},
+            jsPDF: {unit: 'mm', format: 'a4', orientation: 'landscape'}
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            btn.innerHTML = originalText;
+        }).catch(err => {
+            console.error(err);
+            alert('Gagal membuat PDF. Silakan coba lagi.');
+            btn.innerHTML = originalText;
+        });
+    }
+
+    // --- Feature: Hide specific fields on print if empty ---
+    function updatePrintVisibility() {
+        const fields = ['companyPhone', 'companyEmail', 'clientContact'];
+        fields.forEach(id => {
+            const el = document.getElementById(id);
+            // Parent div is the d-flex wrapper we want to hide
+            const wrapper = el.parentElement;
+            if (el.value.trim() === '') {
+                wrapper.classList.add('d-print-none');
+            } else {
+                wrapper.classList.remove('d-print-none');
+            }
+        });
+    }
+
+    // --- Feature: Auto-fill notes with dash if empty ---
+    function checkNotes() {
+        const el = document.getElementById('notes');
+        if (el.value.trim() === '') {
+            el.value = '-';
+            saveData();
+        }
+    }
+
+    function saveData() {
+        // Collect all custom labels
+        const labels = {
+            from: document.getElementById('labelFrom').value,
+            to: document.getElementById('labelTo').value,
+            title: document.getElementById('labelInvoiceTitle').value,
+            subtitle: document.getElementById('labelInvoiceSubtitle').value,
+            invNo: document.getElementById('labelInvoiceNo').value,
+            date: document.getElementById('labelDate').value,
+            due: document.getElementById('labelDue').value,
+            notes: document.getElementById('labelNotes').value,
+            // Headers
+            hItem: document.getElementById('headerItem').value,
+            hDesc: document.getElementById('headerDesc').value,
+            hQty: document.getElementById('headerQty').value,
+            hPrice: document.getElementById('headerPrice').value,
+            hDisc: document.getElementById('headerDisc').value,
+            hTax: document.getElementById('headerTax').value,
+            hTotal: document.getElementById('headerTotal').value,
+            // Footer
+            recipient: document.getElementById('labelRecipient').value,
+            sender: document.getElementById('labelSender').value,
+            lSub: document.getElementById('labelSubtotal').value,
+            lDisc: document.getElementById('labelTotalDisc').value,
+            lTax: document.getElementById('labelTotalTax').value,
+            lGrand: document.getElementById('labelGrandTotal').value
+        };
+
+        const data = {
+            companyName: document.getElementById('companyName').value,
+            companyAddress: document.getElementById('companyAddress').value,
+            companyPhone: document.getElementById('companyPhone').value,
+            companyEmail: document.getElementById('companyEmail').value,
+
+            clientName: document.getElementById('clientName').value,
+            clientAddress: document.getElementById('clientAddress').value,
+            clientContact: document.getElementById('clientContact').value,
+
+            invoiceNo: document.getElementById('invoiceNo').value,
+            invoiceDate: document.getElementById('invoiceDate').value,
+            dueDate: document.getElementById('dueDate').value,
+
+            items: items,
+            notes: document.getElementById('notes').value,
+            signerName: document.getElementById('signerName').value,
+
+            labels: labels,
+
+            settings: {
+                showDisc: document.getElementById('showDisc').checked,
+                showTax: document.getElementById('showTax').checked
+            }
+        };
+        localStorage.setItem('kledo_data', JSON.stringify(data));
+    }
+
+    function loadData() {
+        const logo = localStorage.getItem('kledo_logo');
+        if (logo) {
+            document.getElementById('logoPreview').src = logo;
+            document.getElementById('logoPreview').style.display = 'block';
+            document.getElementById('logoText').style.display = 'none';
+        }
+
+        const saved = localStorage.getItem('kledo_data');
+        if (saved) {
+            const data = JSON.parse(saved);
+            document.getElementById('companyName').value = data.companyName || '';
+            document.getElementById('companyAddress').value = data.companyAddress || '';
+            document.getElementById('companyPhone').value = data.companyPhone || '';
+            document.getElementById('companyEmail').value = data.companyEmail || '';
+
+            document.getElementById('clientName').value = data.clientName || '';
+            document.getElementById('clientAddress').value = data.clientAddress || '';
+            document.getElementById('clientContact').value = data.clientContact || '';
+
+            document.getElementById('invoiceNo').value = data.invoiceNo || 'INV/2026/001';
+            if (data.invoiceDate) document.getElementById('invoiceDate').value = data.invoiceDate;
+            if (data.dueDate) document.getElementById('dueDate').value = data.dueDate;
+
+            if (data.items) items = data.items;
+            document.getElementById('notes').value = data.notes || '';
+            document.getElementById('signerName').value = data.signerName || 'Admin Keuangan';
+
+            // Load Custom Labels
+            if (data.labels) {
+                document.getElementById('labelFrom').value = data.labels.from || 'Dari (Perusahaan)';
+                document.getElementById('labelTo').value = data.labels.to || 'Tagihan Untuk (Klien)';
+                document.getElementById('labelInvoiceTitle').value = data.labels.title || 'INVOICE';
+                document.getElementById('labelInvoiceSubtitle').value = data.labels.subtitle || 'Original Document';
+                document.getElementById('labelInvoiceNo').value = data.labels.invNo || 'Nomor Referensi';
+                document.getElementById('labelDate').value = data.labels.date || 'Tanggal Terbit';
+                document.getElementById('labelDue').value = data.labels.due || 'Jatuh Tempo';
+                document.getElementById('labelNotes').value = data.labels.notes || 'Catatan / Metode Pembayaran';
+
+                document.getElementById('headerItem').value = data.labels.hItem || 'Item';
+                document.getElementById('headerDesc').value = data.labels.hDesc || 'Deskripsi';
+                document.getElementById('headerQty').value = data.labels.hQty || 'Qty';
+                document.getElementById('headerPrice').value = data.labels.hPrice || 'Harga';
+                document.getElementById('headerDisc').value = data.labels.hDisc || 'Disc %';
+                document.getElementById('headerTax').value = data.labels.hTax || 'Pajak %';
+                document.getElementById('headerTotal').value = data.labels.hTotal || 'Total';
+
+                document.getElementById('labelRecipient').value = data.labels.recipient || 'Penerima';
+                document.getElementById('labelSender').value = data.labels.sender || 'Hormat Kami';
+                document.getElementById('labelSubtotal').value = data.labels.lSub || 'Subtotal';
+                document.getElementById('labelTotalDisc').value = data.labels.lDisc || 'Total Diskon';
+                document.getElementById('labelTotalTax').value = data.labels.lTax || 'Total Pajak';
+                document.getElementById('labelGrandTotal').value = data.labels.lGrand || 'Total Tagihan';
+            }
+
+            if (data.settings) {
+                document.getElementById('showDisc').checked = data.settings.showDisc;
+                document.getElementById('showTax').checked = data.settings.showTax;
+            }
+        }
+    }
+
+    function clearData() {
+        if (confirm('Reset semua data? Data akan hilang.')) {
+            localStorage.removeItem('kledo_data');
+            localStorage.removeItem('kledo_logo');
+            location.reload();
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!-- Floating Actions -->
+<div class="fab-container no-print">
+    <div class="fab-group">
+        <button class="fab-btn fab-reset" onclick="clearData()" title="Reset Data">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+        <button class="fab-btn fab-print" onclick="window.print()" title="Cetak (Browser)">
+            <i class="fas fa-print"></i> Cetak
+        </button>
+        <button class="fab-btn fab-dl" onclick="handleDownloadPDF()" title="Simpan PDF">
+            <i class="fas fa-file-pdf"></i> Download PDF
+        </button>
+    </div>
+</div>
+
+<!-- Toggles -->
+<div class="toggles-overlay no-print">
+    <div class="d-flex gap-3 align-items-center">
+        <div class="form-check form-switch m-0">
+            <input class="form-check-input" type="checkbox" id="showDisc" checked onchange="toggleColumns()">
+            <label class="form-check-label" for="showDisc">Diskon</label>
+        </div>
+        <div class="form-check form-switch m-0">
+            <input class="form-check-input" type="checkbox" id="showTax" checked onchange="toggleColumns()">
+            <label class="form-check-label" for="showTax">Pajak</label>
+        </div>
+    </div>
+</div>
+
+<!-- Main Paper -->
+<div class="invoice-paper" id="invoiceArea">
+
+    <div>
+        <!-- Header Grid -->
+        <div class="row header-grid gx-0">
+            <!-- Left Column -->
+            <div class="col-md-6 mobile-no-border pe-md-5">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="logo-placeholder" onclick="document.getElementById('logoInput').click()">
+                            <input type="file" id="logoInput" hidden accept="image/*"
+                                   onchange="handleLogoUpload(this)">
+                            <img id="logoPreview" src="" style="display: none;" alt="">
+                            <span id="logoText" class="text-center small"><i
+                                    class="fas fa-mug-hot mb-1 d-block fa-lg"></i>Logo</span>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div class="section-label-container">
+                            <input type="text" class="editable-label section-label-input" id="labelFrom"
+                                   value="Dari (Perusahaan)" oninput="saveData()">
+                        </div>
+                        <input type="text" class="editable fw-bold fs-6 mb-1 text-primary-custom"
+                               placeholder="Nama Perusahaan Anda" id="companyName" oninput="saveData()">
+                        <textarea class="editable editable-textarea mb-1" rows="2" placeholder="Alamat Perusahaan"
+                                  id="companyAddress" oninput="saveData()"></textarea>
+                        <div class="d-flex align-items-center" id="companyPhoneWrapper">
+                            <span class="input-group-text-custom"><i class="fas fa-phone"></i></span>
+                            <input type="text" class="editable" placeholder="Telepon" id="companyPhone"
+                                   oninput="saveData(); updatePrintVisibility()">
+                        </div>
+                        <div class="d-flex align-items-center" id="companyEmailWrapper">
+                            <span class="input-group-text-custom"><i class="fas fa-envelope"></i></span>
+                            <input type="text" class="editable" placeholder="Email" id="companyEmail"
+                                   oninput="saveData(); updatePrintVisibility()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="section-label-container">
+                        <input type="text" class="editable-label section-label-input" id="labelTo"
+                               value="Tagihan Untuk (Klien)" oninput="saveData()">
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <input type="text" class="editable fw-bold fs-6 mb-1 text-primary-custom"
+                                   placeholder="Nama Klien" id="clientName" oninput="saveData()">
+                            <textarea class="editable editable-textarea mb-1" rows="2" placeholder="Alamat Klien"
+                                      id="clientAddress" oninput="saveData()"></textarea>
+                            <div class="d-flex align-items-center" id="clientContactWrapper">
+                                <span class="input-group-text-custom"><i class="fas fa-user"></i></span>
+                                <input type="text" class="editable" placeholder="Nama Kontak (Opsional)"
+                                       id="clientContact" oninput="saveData(); updatePrintVisibility()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-md-6 mobile-ps-0 ps-md-5">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="w-100">
+                        <input type="text" class="editable-label title-input" id="labelInvoiceTitle" value="INVOICE"
+                               oninput="saveData()">
+                        <input type="text" class="editable-label text-muted small" id="labelInvoiceSubtitle"
+                               value="Original Document" oninput="saveData()">
+                    </div>
+                    <div class="text-end" style="min-width: 150px;">
+                        <div class="mb-1">
+                            <input type="text" class="editable-label text-end text-secondary small fw-bold"
+                                   id="labelInvoiceNo" value="Nomor Referensi" oninput="saveData()">
+                            <input type="text" class="editable text-end fw-bold fs-5 text-primary-custom"
+                                   value="INV/2026/001" id="invoiceNo" oninput="saveData()">
+                        </div>
+                        <div class="mb-1">
+                            <input type="text" class="editable-label text-end text-secondary small fw-bold"
+                                   id="labelDate" value="Tanggal Terbit" oninput="saveData()">
+                            <input type="date" class="editable text-end" id="invoiceDate" oninput="saveData()">
+                        </div>
+                        <div>
+                            <input type="text" class="editable-label text-end text-secondary small fw-bold"
+                                   id="labelDue" value="Jatuh Tempo" oninput="saveData()">
+                            <input type="date" class="editable text-end text-danger" id="dueDate"
+                                   oninput="saveData()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Area -->
+                <div class="mt-4 pt-3 border-top" style="border-color: #D7CCC8 !important;">
+                    <div class="section-label-container">
+                        <input type="text" class="editable-label section-label-input" id="labelNotes"
+                               value="Catatan / Metode Pembayaran" oninput="saveData()">
+                    </div>
+                    <textarea class="editable editable-textarea p-2 rounded" style="background-color: #FBE9E7;"
+                              rows="3"
+                              placeholder="Silakan transfer ke Bank BCA 1234567890 a.n PT Sinergi Kode..."
+                              id="notes"
+                              oninput="saveData()" onblur="checkNotes()"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="mt-4">
+            <div class="table-responsive-custom">
+                <table class="invoice-table">
+                    <thead>
+                    <tr>
+                        <th class="col-item"><input type="text" class="editable-label" id="headerItem" value="Item"
+                                                    oninput="saveData()"></th>
+                        <th class="col-desc"><input type="text" class="editable-label" id="headerDesc"
+                                                    value="Deskripsi"
+                                                    oninput="saveData()"></th>
+                        <th class="col-qty"><input type="text" class="editable-label text-center" id="headerQty"
+                                                   value="Qty" oninput="saveData()"></th>
+                        <th class="col-price"><input type="text" class="editable-label text-end" id="headerPrice"
+                                                     value="Harga" oninput="saveData()"></th>
+                        <th class="col-disc column-disc"><input type="text" class="editable-label text-center"
+                                                                id="headerDisc" value="Disc %" oninput="saveData()">
+                        </th>
+                        <th class="col-tax column-tax"><input type="text" class="editable-label text-center"
+                                                              id="headerTax" value="Pajak %" oninput="saveData()">
+                        </th>
+                        <th class="col-total"><input type="text" class="editable-label text-end" id="headerTotal"
+                                                     value="Total" oninput="saveData()"></th>
+                        <th class="no-print" style="width: 30px;"></th>
+                    </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                    <!-- Javascript will load items here -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- data-html2canvas-ignore ensures this button is not in PDF -->
+            <button class="btn-add-item no-print" data-html2canvas-ignore="true" onclick="addItem()">
+                <i class="fas fa-plus me-2"></i> Tambah Item Baru
+            </button>
+        </div>
+
+        <!-- Footer / Totals -->
+        <div class="row mt-4">
+            <div class="col-md-7 order-2 order-md-1 mt-4 mt-md-0">
+                <div class="d-flex gap-2 gap-md-5 justify-content-between justify-content-md-start">
+                    <div class="text-center" style="width: 140px;">
+                        <div class="mb-4">
+                            <input type="text" class="editable-label text-center small text-muted"
+                                   id="labelRecipient"
+                                   value="Penerima" oninput="saveData()">
+                        </div>
+                        <div class="border-bottom border-secondary mb-2"
+                             style="height: 40px; border-color: #A1887F !important;"></div>
+                        <span class="small text-muted">( Tanda Tangan )</span>
+                    </div>
+                    <div class="text-center" style="width: 140px;">
+                        <div class="mb-4">
+                            <input type="text" class="editable-label text-center small text-muted" id="labelSender"
+                                   value="Hormat Kami" oninput="saveData()">
+                        </div>
+                        <div style="height: 40px;"></div>
+                        <input type="text" class="editable text-center fw-bold small border-bottom"
+                               style="border-color: #A1887F !important;" value="Manager Keuangan" id="signerName"
+                               oninput="saveData()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5 order-1 order-md-2">
+                <div class="totals-box">
+                    <div class="d-flex justify-content-between mb-1">
+                        <div style="width: 50%;">
+                            <input type="text" class="editable-label text-secondary small" id="labelSubtotal"
+                                   value="Subtotal" oninput="saveData()">
+                        </div>
+                        <span class="fw-bold" id="subtotalDisplay">Rp 0</span>
+                    </div>
+
+                    <div id="rowTotalDisc" class="d-flex justify-content-between mb-1 text-danger small">
+                        <div style="width: 50%;">
+                            <input type="text" class="editable-label text-danger" id="labelTotalDisc"
+                                   value="Total Diskon" oninput="saveData()">
+                        </div>
+                        <span id="totalDiscDisplay">(Rp 0)</span>
+                    </div>
+
+                    <div id="rowTotalTax" class="d-flex justify-content-between mb-2 small">
+                        <div style="width: 50%;">
+                            <input type="text" class="editable-label" id="labelTotalTax" value="Total Pajak"
+                                   oninput="saveData()">
+                        </div>
+                        <span id="totalTaxDisplay">Rp 0</span>
+                    </div>
+
+                    <hr class="my-2" style="border-color: #D7CCC8;">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div style="width: 60%;">
+                            <input type="text" class="editable-label fs-5 fw-bold text-primary-custom"
+                                   id="labelGrandTotal" value="Total Tagihan" oninput="saveData()">
+                        </div>
+                        <span class="fs-5 fw-bold text-primary-custom" id="grandTotalDisplay">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branding Footer (Ignored in PDF generation via data-html2canvas-ignore) -->
+    <div class="brand-footer" data-html2canvas-ignore="true">
+        <i class="fas fa-mug-hot me-1"></i> Powered by <strong>ngopikode.</strong>
+    </div>
+
+</div>

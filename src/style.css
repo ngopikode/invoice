@@ -1,0 +1,566 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+:root {
+    /* Tema Ngopikode: Coffee & Warm Tones */
+    --primary-color: #6F4E37; /* Coffee Brown */
+    --primary-hover: #5D4037;
+    --secondary-color: #795548;
+    --bg-color: #EFEBE9; /* Very light warm grey */
+    --paper-width: 297mm;
+    --paper-height: 210mm;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Inter', sans-serif;
+    color: #3E2723; /* Dark Brown Text */
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 20px 20px 100px;
+}
+
+/* --- Paper Styles --- */
+.invoice-paper {
+    background-color: white;
+    width: var(--paper-width);
+    min-height: var(--paper-height);
+    margin: 0 auto;
+    padding: 15mm;
+    box-shadow: 0 10px 30px rgba(62, 39, 35, 0.1); /* Brownish shadow */
+    position: relative;
+    box-sizing: border-box;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* --- Editable Logic (Updated with Edit Icon) --- */
+.editable, .editable-label {
+    background: transparent;
+    border: 1px solid transparent; /* Transparent border default */
+    border-bottom: 1px dashed #D7CCC8; /* Dashed line for visual cue */
+    border-radius: 2px;
+    width: 100%;
+    color: inherit;
+    font-family: inherit;
+    transition: 0.2s;
+    cursor: text;
+}
+
+/* Input specific resets */
+.editable-label {
+    padding: 0;
+    margin: 0;
+    font-weight: inherit;
+    font-size: inherit;
+    text-transform: inherit;
+    text-align: inherit;
+}
+
+.editable {
+    padding: 2px 4px;
+}
+
+.editable-textarea {
+    resize: none;
+    overflow: hidden;
+    min-height: 1.5em;
+}
+
+/* --- Hover State: Show Edit Icon --- */
+.editable:hover, .editable-label:hover {
+    background-color: #FAFAFA;
+    border-bottom-color: var(--primary-color);
+    /* Pensil Icon SVG Data URI */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%236F4E37' opacity='0.5'%3E%3Cpath d='M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L386 255.3l22.6-22.6 1.7 1.7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 4px center; /* Icon on the right */
+    background-size: 12px;
+}
+
+/* Text area edit icon alignment */
+textarea.editable:hover {
+    background-position: top 4px right 4px;
+}
+
+/* Focus State: Remove icon, highlight border */
+.editable:focus, .editable-label:focus {
+    outline: none;
+    border-bottom: 1px solid var(--primary-color);
+    background-color: #fff;
+    background-image: none; /* Hide icon when typing */
+}
+
+/* Specific styles for special inputs */
+.invoice-table th input.editable-label {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+}
+
+.title-input {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    letter-spacing: -1px;
+    text-align: left;
+}
+
+/* --- Section Labels --- */
+.section-label-container {
+    margin-bottom: 5px;
+    border-bottom: 2px solid #D7CCC8;
+    padding-bottom: 2px;
+}
+
+.section-label-input {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--secondary-color);
+    font-weight: 700;
+}
+
+.input-group-text-custom {
+    background: transparent;
+    border: none;
+    color: var(--secondary-color);
+    font-size: 0.85rem;
+    padding-right: 5px;
+    width: 20px;
+}
+
+/* --- Components --- */
+.logo-placeholder {
+    width: 100%;
+    height: 100px;
+    background-color: #FAFAFA;
+    border: 2px dashed #D7CCC8;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #A1887F;
+    transition: 0.2s;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.logo-placeholder:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.logo-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* --- Table Styling --- */
+.table-responsive-custom {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    min-width: 600px;
+}
+
+.invoice-table th {
+    text-align: left;
+    padding: 8px 4px;
+    border-bottom: 2px solid #D7CCC8;
+    white-space: nowrap;
+}
+
+.invoice-table td {
+    padding: 6px 4px;
+    vertical-align: top;
+    background: #fff;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Column Widths */
+.col-item {
+    width: 20%;
+    min-width: 120px;
+}
+
+.col-desc {
+    width: 25%;
+    min-width: 150px;
+}
+
+.col-qty {
+    width: 8%;
+    text-align: center;
+    min-width: 60px;
+}
+
+.col-price {
+    width: 15%;
+    text-align: right;
+    min-width: 100px;
+}
+
+.col-disc {
+    width: 10%;
+    text-align: center;
+    min-width: 80px;
+}
+
+.col-tax {
+    width: 10%;
+    text-align: center;
+    min-width: 80px;
+}
+
+.col-total {
+    width: 12%;
+    text-align: right;
+    min-width: 100px;
+}
+
+.btn-add-item {
+    width: 100%;
+    padding: 12px;
+    border: 1px dashed var(--primary-color);
+    background: #FBE9E7; /* Light warm bg */
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.btn-add-item:hover {
+    background: #FFCCBC;
+}
+
+/* --- Floating Action Buttons --- */
+.fab-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+    z-index: 1000;
+}
+
+.fab-group {
+    display: flex;
+    gap: 10px;
+}
+
+.fab-btn {
+    height: 50px;
+    padding: 0 20px;
+    border-radius: 25px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+    gap: 8px;
+}
+
+.fab-btn:active {
+    transform: scale(0.95);
+}
+
+.fab-print {
+    background-color: var(--primary-color);
+}
+
+.fab-print:hover {
+    background-color: var(--primary-hover);
+}
+
+.fab-dl {
+    background-color: #2E7D32;
+}
+
+/* Green for download */
+.fab-dl:hover {
+    background-color: #1B5E20;
+}
+
+.fab-reset {
+    background-color: #D32F2F;
+    width: 50px;
+    padding: 0;
+}
+
+.fab-reset:hover {
+    background-color: #B71C1C;
+}
+
+/* --- Toggles Overlay --- */
+.toggles-overlay {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    font-size: 0.85rem;
+    z-index: 1000;
+    border: 1px solid #D7CCC8;
+    color: var(--primary-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* --- Footer Branding --- */
+.brand-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #A1887F;
+    border-top: 1px dotted #D7CCC8;
+    width: 100%;
+}
+
+.brand-footer i {
+    color: var(--primary-color);
+}
+
+/* --- Totals Box --- */
+.totals-box {
+    background-color: #FBE9E7; /* Very light warm bg */
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.text-primary-custom {
+    color: var(--primary-color) !important;
+}
+
+/* --- Responsive Logic --- */
+@media (max-width: 992px) {
+    body {
+        padding: 10px 10px 90px;
+    }
+
+    .invoice-paper {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .mobile-no-border {
+        border-right: none !important;
+        border-bottom: 1px solid #D7CCC8;
+        padding-right: 0 !important;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+    }
+
+    .mobile-ps-0 {
+        padding-left: 0 !important;
+    }
+
+    .header-grid {
+        flex-direction: column;
+    }
+
+    /* Adjust FAB for mobile */
+    .fab-btn {
+        font-size: 0.8rem;
+        padding: 0 15px;
+        height: 45px;
+    }
+
+    .fab-reset {
+        width: 45px;
+        padding: 0;
+    }
+
+    .toggles-overlay {
+        bottom: 75px;
+        left: auto;
+        right: 20px;
+    }
+
+    .title-input {
+        font-size: 2rem;
+    }
+}
+
+/* --- Print Styles --- */
+@media print {
+    @page {
+        size: landscape;
+        margin: 0;
+    }
+
+    body {
+        background: white;
+        margin: 0;
+        padding: 0;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .invoice-paper {
+        box-shadow: none;
+        margin: 0;
+        width: 100%;
+        height: 100vh;
+        padding: 10mm 15mm;
+        border: none;
+        max-width: none;
+    }
+
+    .header-grid {
+        flex-direction: row !important;
+    }
+
+    .mobile-no-border {
+        border-right: 1px solid #D7CCC8 !important;
+        border-bottom: none !important;
+        padding-right: 3rem !important;
+        margin-bottom: 0 !important;
+    }
+
+    .mobile-ps-0 {
+        padding-left: 3rem !important;
+    }
+
+    .col-md-6 {
+        width: 50% !important;
+        flex: 0 0 auto !important;
+    }
+
+    /* Hide non-print elements AND Footer */
+    .no-print,
+    .fab-container,
+    .toggles-overlay,
+    .btn-add-item,
+    .brand-footer {
+        display: none !important;
+    }
+
+    /* Clean up editable fields for print */
+    .editable, .editable-label {
+        border: none !important;
+        padding: 0;
+        cursor: default;
+        background-image: none !important; /* Ensure no edit icon on print */
+    }
+
+    .logo-placeholder {
+        border: none;
+    }
+
+    .logo-placeholder:not(:has(img)) {
+        display: none;
+    }
+
+    .table-responsive-custom {
+        overflow: visible;
+    }
+
+    .invoice-table {
+        min-width: auto;
+    }
+
+    .title-input {
+        text-align: left !important;
+    }
+}
+
+/* =========================================
+   NEW STRATEGY: CLONE & SNAPSHOT
+   ========================================= */
+
+/* Class ini hanya ditempel ke elemen bayangan (clone) */
+.pdf-clone-mode {
+    /* Posisikan di luar layar user biar gak ganggu pemandangan */
+    position: fixed;
+    top: -9999px;
+    left: -9999px;
+    z-index: -1;
+
+    /* KUNCI UKURAN KERTAS A4 LANDSCAPE (Mutlak) */
+    width: 297mm !important;
+    height: 210mm !important;
+    max-width: 297mm !important;
+    max-height: 210mm !important;
+
+    /* Padding biar teks gak mepet pinggir kertas */
+    padding: 15mm !important;
+
+    background-color: white !important;
+
+    /* Pastikan semua elemen di dalamnya pas */
+    box-sizing: border-box !important;
+
+    /* Reset margin aneh */
+    margin: 0 !important;
+}
+
+/* Bersihkan Input di dalam Clone */
+.pdf-clone-mode input,
+.pdf-clone-mode textarea,
+.pdf-clone-mode .editable {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    resize: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    min-height: auto !important;
+    color: #000 !important; /* Hitam pekat */
+
+    /* Trik layout textarea */
+    white-space: pre-wrap !important;
+    overflow: hidden !important;
+}
+
+.pdf-clone-mode .title-input {
+    font-size: 1rem !important;
+}
+
+/* Sembunyikan elemen sampah di dalam Clone */
+.pdf-clone-mode .no-print,
+.pdf-clone-mode .btn-add-item,
+.pdf-clone-mode .fab-container,
+.pdf-clone-mode .toggles-overlay,
+.pdf-clone-mode .fa-trash,
+.pdf-clone-mode .logo-placeholder span {
+    display: none !important;
+}
+
+/* Pastikan logo tampil penuh */
+.pdf-clone-mode .logo-placeholder {
+    border: none !important;
+}
